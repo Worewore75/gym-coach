@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F291E">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>FIT-EASY 秦野店 トレーニング・コーチ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background-color: #F4F7F6;
+    color: #0F172A;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10.5rem); }
+</style>
+</head>
+<body class="min-h-screen safe-bottom">
+
+  <!-- Top App Header -->
+  <header class="sticky top-0 z-30 bg-[#0F291E] text-white shadow-md">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight">FIT-EASY 秦野店 コーチ</h1>
+        </div>
+        <p class="text-xs text-emerald-200/90 mt-0.5">目標 92kg → 78kg（−14kg）× ゴルフ安定</p>
+      </div>
+      <div class="text-right">
+        <div class="text-[11px] text-emerald-200/80">現在体重 / 目標まで</div>
+        <div class="text-sm sm:text-base font-bold tabular-nums" id="headerWeightSummary">92.0kg / 残14.0kg</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-3xl mx-auto px-3 sm:px-4 pt-4">
+
+    <!-- TAB 1: WORKOUT MENU -->
+    <section id="view-workout" class="space-y-4">
+      <!-- Day Selector -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="dayTabs"></div>
+
+      <!-- Day Summary Banner -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="dayBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Day 1</span>
+              <span id="dayDuration" class="text-xs font-medium text-slate-500">目安 95〜105分</span>
+            </div>
+            <h2 id="dayTitle" class="text-lg font-bold text-slate-900 mt-1">下半身・股関節＆前傾キープ</h2>
+            <p id="dayDesc" class="text-xs sm:text-sm text-slate-600 mt-0.5"></p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-500">今日の完了</div>
+            <div id="dayProgressText" class="text-lg font-bold text-emerald-700 tabular-nums">0 / 6</div>
+          </div>
+        </div>
+        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mt-3">
+          <div id="dayProgressBar" class="h-full bg-emerald-600 transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 rounded-xl px-3 py-2">
+          <span>準備運動10分（軽い有酸素5分＋股関節・肩甲骨ストレッチ5分）から開始しましょう。</span>
+          <label class="inline-flex items-center gap-1.5 font-medium text-slate-700 cursor-pointer select-none">
+            <input type="checkbox" id="autoStartTimerToggle" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+            <span>記録時にタイマー自動開始</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Exercise Cards List -->
+      <div id="exerciseList" class="space-y-3"></div>
+    </section>
+
+    <!-- TAB 2: AI AGENT NEXT WEEK PROPOSAL -->
+    <section id="view-agent" class="hidden space-y-4">
+      <div class="bg-gradient-to-br from-[#0F291E] to-[#184532] text-white rounded-2xl p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold text-emerald-300 tracking-wide">AIエージェント分析</p>
+            <h2 class="text-xl font-bold mt-0.5">次週の負荷・メニュー自動提案</h2>
+            <p class="text-xs sm:text-sm text-emerald-100/90 mt-1">
+              記録した「重量・回数」と体感（楽／ちょうどよい／きつい）から、怪我を防ぎながら効率よく伸ばす次週メニューを計算します。
+            </p>
+          </div>
+          <button type="button" id="applyAllProposalsBtn" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold text-sm shadow transition">
+            次週の目安に一括反映
+          </button>
+        </div>
+        <div id="agentSummaryStats" class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/15 text-center"></div>
+      </div>
+
+      <div id="agentProposalList" class="space-y-3"></div>
+    </section>
+
+    <!-- TAB 3: PROGRESS & WEIGHT CHART -->
+    <section id="view-progress" class="hidden space-y-4">
+      <!-- Goal Progress Card -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">減量ロードマップ（92kg → 78kg）</h2>
+            <p class="text-xs text-slate-500 mt-0.5">推奨ペース：週0.5〜0.7kg減（筋肉を守りながら約6ヶ月で到達）</p>
+          </div>
+          <span id="weightGoalPct" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-sm font-bold tabular-nums">0% 達成</span>
+        </div>
+        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mt-3">
+          <div id="weightGoalBar" class="h-full bg-emerald-600 transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+          <div class="bg-slate-50 rounded-xl p-2.5">
+            <div class="text-[11px] text-slate-500">スタート</div>
+            <div class="text-base font-bold text-slate-800 tabular-nums">92.0 kg</div>
+          </div>
+          <div class="bg-emerald-50 rounded-xl p-2.5">
+            <div class="text-[11px] text-emerald-700">最新体重</div>
+            <div id="latestWeightDisplay" class="text-base font-bold text-emerald-800 tabular-nums">92.0 kg</div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-2.5">
+            <div class="text-[11px] text-slate-500">目標</div>
+            <div class="text-base font-bold text-slate-800 tabular-nums">78.0 kg</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weight & Golf Memo Form -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+        <h3 class="text-base font-bold text-slate-900 mb-3">体重・体組成・ゴルフメモを記録</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="weightInput" class="block text-xs font-medium text-slate-600 mb-1">体重 (kg)</label>
+            <input type="number" step="0.1" min="40" max="180" id="weightInput" value="92.0" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-base font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label for="bodyFatInput" class="block text-xs font-medium text-slate-600 mb-1">体脂肪率 (%) 任意</label>
+            <input type="number" step="0.1" min="5" max="60" id="bodyFatInput" placeholder="体組成計の値" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-base tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label for="golfMemoInput" class="block text-xs font-medium text-slate-600 mb-1">FIT-GOLF・体調メモ</label>
+            <input type="text" id="golfMemoInput" placeholder="例：7Iの方向性が安定" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+        <button type="button" id="saveWeightBtn" class="mt-3 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm transition">
+          体重・メモを保存
+        </button>
+      </div>
+
+      <!-- Weight Chart -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+        <h3 class="text-base font-bold text-slate-900 mb-2">体重推移グラフ</h3>
+        <div class="relative h-64 w-full">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Workout History -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-slate-900">最近のトレーニング履歴</h3>
+          <span id="historyCountBadge" class="text-xs font-semibold text-slate-500">0件</span>
+        </div>
+        <div id="workoutHistoryList" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: GYM INFO & SETTINGS -->
+    <section id="view-settings" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+        <h2 class="text-lg font-bold text-slate-900">FIT-EASY 秦野店 登録設備</h2>
+        <p class="text-xs text-slate-600 mt-1">
+          住所：神奈川県秦野市曽屋3511（24時間営業）｜導入ブランド：Life Fitness / BULL / TORTURE
+        </p>
+        <div class="mt-3 flex flex-wrap gap-1.5" id="gymMachineChips"></div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1">
+          <p><strong>付帯設備の活用：</strong>週1回は店内の「体組成計」で筋肉量をチェックし、Day 3・Day 4の仕上げに「FIT-GOLF」でスイング軸を確認するのがおすすめです。</p>
+          <p><strong>店舗公式ページ：</strong><a href="https://shops.fiteasy.jp/shop193" target="_blank" rel="noopener noreferrer" class="text-emerald-700 underline font-medium">FIT-EASY 秦野店 公式サイトを開く</a></p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+        <h3 class="text-base font-bold text-slate-900">スマホのホーム画面に追加して使うコツ</h3>
+        <ul class="mt-2 space-y-1.5 text-xs sm:text-sm text-slate-600 list-disc pl-5">
+          <li><strong>YouTube埋め込み再生を有効にする手順（エラー153対策）</strong>：HTMLファイルをスマホやPCに保存して直接開く（file://）とYouTubeの仕様でエラー153が出ます。このHTMLファイルを<strong>Netlify Drop</strong>（ドラッグ＆ドロップで無料公開）や<strong>GitHub Pages</strong>等のHTTPS URLへ置くと、アプリ内でそのまま動画再生できます。</li>
+          <li><strong>iPhone (Safari)</strong>：公開したURLを開き、画面下の「共有」→「ホーム画面に追加」。</li>
+          <li><strong>Android (Chrome)</strong>：公開したURLを開き、右上のメニュー（︙）→「ホーム画面に追加」。</li>
+          <li>記録データはお使いのブラウザ内に自動保存されます。機種変更時は下のバックアップ機能をお使いください。</li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-3">
+        <h3 class="text-base font-bold text-slate-900">データ管理・バックアップ</h3>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="exportJsonBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs sm:text-sm font-semibold transition">
+            記録をJSONで書き出す
+          </button>
+          <label class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs sm:text-sm font-semibold cursor-pointer transition">
+            JSONから復元
+            <input type="file" id="importJsonInput" accept="application/json" class="hidden">
+          </label>
+          <button type="button" id="openResetModalBtn" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs sm:text-sm font-semibold transition">
+            初期状態にリセット
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Rest Timer Bar -->
+  <div id="timerBar" class="fixed bottom-[4.25rem] left-0 right-0 z-30 px-3 pointer-events-none">
+    <div class="max-w-3xl mx-auto bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-700/80 px-3.5 py-2.5 pointer-events-auto">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <div id="timerLabel" class="text-[11px] text-emerald-300 font-medium truncate">セット間タイマー（種目ボタンで自動設定）</div>
+          <div class="flex items-baseline gap-2">
+            <span id="timerDisplay" class="text-2xl font-bold tabular-nums tracking-tight">01:30</span>
+            <span id="timerStatus" class="text-[11px] text-slate-400">待機中</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" id="timerMinusBtn" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold tabular-nums">−15s</button>
+          <button type="button" id="timerPlusBtn" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold tabular-nums">+15s</button>
+          <button type="button" id="timerStartPauseBtn" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">開始</button>
+          <button type="button" id="timerResetBtn" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold">戻す</button>
+          <button type="button" id="timerMuteBtn" aria-label="通知音の切替" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold">音ON</button>
+        </div>
+      </div>
+      <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-2">
+        <div id="timerProgress" class="h-full bg-emerald-400 transition-all duration-200" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg">
+    <div class="max-w-3xl mx-auto grid grid-cols-4 h-16">
+      <button type="button" data-tab="workout" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-emerald-700 font-bold text-xs">
+        <span class="text-lg leading-none">🏋️</span>
+        <span>メニュー</span>
+      </button>
+      <button type="button" data-tab="agent" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-slate-500 font-medium text-xs">
+        <span class="text-lg leading-none">🤖</span>
+        <span>次週提案</span>
+      </button>
+      <button type="button" data-tab="progress" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-slate-500 font-medium text-xs">
+        <span class="text-lg leading-none">📈</span>
+        <span>体重・履歴</span>
+      </button>
+      <button type="button" data-tab="settings" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-slate-500 font-medium text-xs">
+        <span class="text-lg leading-none">⚙️</span>
+        <span>秦野店・設定</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- YouTube Video Modal -->
+  <div id="videoModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+        <div class="min-w-0 pr-2">
+          <h3 id="videoModalTitle" class="text-base font-bold text-slate-900 truncate">フォーム解説動画</h3>
+          <p id="videoModalSubtitle" class="text-xs text-slate-500 truncate"></p>
+        </div>
+        <button type="button" id="closeVideoModalBtn" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold shrink-0">閉じる</button>
+      </div>
+      <div class="bg-black aspect-video w-full" id="videoFrameContainer"></div>
+      <div class="p-4 space-y-3">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs sm:text-sm text-emerald-950">
+          <div class="font-bold text-emerald-800 mb-0.5">初心者フォーム習得ポイント</div>
+          <p id="videoModalTips"></p>
+        </div>
+        <div id="videoEnvNotice" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs text-amber-900 leading-relaxed"></div>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5">
+            <button type="button" id="toggleEmbedModeBtn" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+              埋め込み切替
+            </button>
+          </div>
+          <a id="videoExternalLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition">
+            YouTubeアプリで開く ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirmation Modal -->
+  <div id="resetModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+      <h3 class="text-base font-bold text-slate-900">すべての記録をリセットしますか？</h3>
+      <p class="text-xs sm:text-sm text-slate-600">保存されているトレーニング履歴・体重データ・次週調整値がすべて初期状態（初心者フォーム習得用の目安負荷）に戻ります。</p>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="cancelResetBtn" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">キャンセル</button>
+        <button type="button" id="confirmResetBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">リセットする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-full shadow-lg border border-emerald-500/40"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  const STORAGE_KEY = 'fiteasy_hadano_coach_v1';
+
+  // Grounded FIT-EASY Hadano 16-machine list
+  const HADANO_MACHINES = [
+    'アシストディップチン', 'アブダクション／アダクション', 'アブドミナル', 'ケーブルマシン',
+    'シーテッドロー', 'デクラインプレス', 'デクラインペックフライ', 'プローンレッグカール',
+    'ミリタリープレス', 'ラットプルダウン', 'ラテラルレイズ', 'レッグエクステンション',
+    'レッグプレス', 'レッグレイズ', 'ロータリートーソ', 'ローワーバック',
+    'ベンチプレス', '有酸素マシン', 'FIT-GOLF', '体組成計', 'FIT-SAUNA', 'O2ルーム'
+  ];
+
+  // 4-day program with beginner form-learning initial loads (180cm / 92kg / 2 months exp)
+  const PROGRAM_DAYS = [
+    {
+      id: 'day1',
+      badge: 'Day 1',
+      title: '下半身・股関節＆前傾キープ',
+      duration: '目安 95〜105分',
+      desc: '最大筋群の脚で代謝を底上げしつつ、お尻・内もも・背筋でゴルフのスウェー防止と前傾姿勢の安定を作ります。',
+      exercises: [
+        {
+          id: 'd1_legpress',
+          name: 'レッグプレス',
+          muscle: '太もも全体・お尻',
+          tag: '減量・代謝',
+          initialWeight: 50,
+          stepKg: 5,
+          targetReps: 12,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 90,
+          videoId: '7_qPg97ys4g',
+          videoLabel: '初心者向けレッグプレス解説',
+          formTip: '初期目安50kg。お尻がシートから浮かない範囲で深く曲げ、伸ばす時は膝をロックせず少し緩めた位置で止めます。'
+        },
+        {
+          id: 'd1_legcurl',
+          name: 'プローンレッグカール',
+          muscle: 'ハムストリング（もも裏）',
+          tag: 'ゴルフ安定',
+          initialWeight: 20,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 75,
+          videoId: '_M7Z6R8MjGM',
+          videoLabel: 'プローンレッグカール使い方',
+          formTip: '初期目安20kg。股関節をシートの頂点に合わせ、曲げる時に腰が反って浮かないようお腹に軽く力を入れます。'
+        },
+        {
+          id: 'd1_legext',
+          name: 'レッグエクステンション',
+          muscle: '大腿四頭筋（太もも前）',
+          tag: '減量・代謝',
+          initialWeight: 25,
+          stepKg: 5,
+          targetReps: 12,
+          repRange: '12–15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'rPy1El9k9rk',
+          videoLabel: 'FIT-EASY公式 レッグエクステンション',
+          formTip: '初期目安25kg。膝を伸ばしきった位置で1秒止め、反動を使わず2秒かけてゆっくり戻します。'
+        },
+        {
+          id: 'd1_abdadd',
+          name: 'アブダクション／アダクション',
+          muscle: 'お尻横・内もも（股関節）',
+          tag: 'ゴルフ安定',
+          initialWeight: 25,
+          stepKg: 5,
+          targetReps: 15,
+          repRange: '各12–15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'KpcDmC9cflA',
+          videoLabel: 'アブダクション／アダクション解説',
+          formTip: '初期目安25kg。パッド位置を切り替えて開閉両方を実施。スイング時の体重移動での左右ブレ（スウェー）を防ぎます。'
+        },
+        {
+          id: 'd1_lowerback',
+          name: 'ローワーバック',
+          muscle: '脊柱起立筋（腰背部）',
+          tag: 'ゴルフ安定',
+          initialWeight: 20,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '12–15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'mGZbTlBsfFw',
+          videoLabel: '初心者向けローワーバック解説',
+          formTip: '初期目安20kg。腰を反らせすぎず、頭からお尻が一直線になる位置で止めてゆっくり戻します。'
+        },
+        {
+          id: 'd1_cardio',
+          name: '有酸素マシン（傾斜ウォーキング等）',
+          muscle: '脂肪燃焼・心肺機能',
+          tag: '減量・代謝',
+          isCardio: true,
+          initialWeight: 25,
+          stepKg: 5,
+          targetReps: 1,
+          repRange: '25分連続',
+          targetSets: 1,
+          restSec: 60,
+          videoId: '',
+          videoLabel: '',
+          formTip: '体重92kg時は膝負担を抑えるため、ランニングより「傾斜5〜8%・時速4.5〜5.5kmの早歩き」が安全かつ高効率です。'
+        }
+      ]
+    },
+    {
+      id: 'day2',
+      badge: 'Day 2',
+      title: '胸・肩・腕（押す力）＆腹筋',
+      duration: '目安 95〜105分',
+      desc: '胸と肩の大筋群で上半身の基礎代謝を高め、アドレス姿勢とインパクト時の胸郭の締まりを強化します。',
+      exercises: [
+        {
+          id: 'd2_declinepress',
+          name: 'デクラインプレス（またはベンチプレス）',
+          muscle: '大胸筋・二の腕',
+          tag: '減量・代謝',
+          initialWeight: 30,
+          stepKg: 2.5,
+          targetReps: 10,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 120,
+          videoId: '1SO34BI8jLM',
+          videoLabel: 'デクラインプレス解説',
+          formTip: '初期目安30kg（ベンチプレスならバー20kg＋左右5kg）。肩甲骨を寄せて胸を張り、肩がすくまない軌道で押します。'
+        },
+        {
+          id: 'd2_pecfly',
+          name: 'デクラインペックフライ',
+          muscle: '大胸筋（内側・全体）',
+          tag: 'ゴルフ安定',
+          initialWeight: 20,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '12–15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'n8mXBgkQSxw',
+          videoLabel: '初心者向けペックフライ完全解説',
+          formTip: '初期目安20kg。肘をわずかに曲げたまま大きな弧を描くように閉じ、胸の収縮を感じてから丁寧に開きます。'
+        },
+        {
+          id: 'd2_military',
+          name: 'ミリタリープレス',
+          muscle: '三角筋（肩全体）',
+          tag: 'ゴルフ安定',
+          initialWeight: 15,
+          stepKg: 2.5,
+          targetReps: 10,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 90,
+          videoId: 'UGp58eMDJI0',
+          videoLabel: 'FIT-EASY公式 ショルダープレス',
+          formTip: '初期目安15kg。背もたれにしっかり背中をつけ、腰が反らないように腹圧を保ったまま真上へ押し上げます。'
+        },
+        {
+          id: 'd2_lateral',
+          name: 'ラテラルレイズ',
+          muscle: '三角筋中部（肩側面）',
+          tag: '減量・代謝',
+          initialWeight: 10,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '12–15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'PAJKTZfUMAM',
+          videoLabel: 'FIT-EASY公式 ラテラルレイズ',
+          formTip: '初期目安10kg。軽めの重さで肩をすくめず、肘から真横に持ち上げる意識でフォームを固めます。'
+        },
+        {
+          id: 'd2_dips',
+          name: 'アシストディップチン（ディップス）',
+          muscle: '大胸筋下部・上腕三頭筋',
+          tag: 'アシスト式',
+          isAssist: true,
+          initialWeight: 50,
+          stepKg: 5,
+          targetReps: 10,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 90,
+          videoId: 'g15rbatPXwc',
+          videoLabel: 'アシストディップチン使い方',
+          formTip: '初期目安アシスト50kg（数値が大きいほど軽くなります）。肩を下げ、肘が90度になる位置までゆっくり下ろします。'
+        },
+        {
+          id: 'd2_abdominal',
+          name: 'アブドミナル',
+          muscle: '腹直筋（腹筋）',
+          tag: '体幹回旋',
+          initialWeight: 20,
+          stepKg: 2.5,
+          targetReps: 15,
+          repRange: '12–15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'gWLMZ6Dn5eY',
+          videoLabel: 'FIT-EASY公式 アブドミナル',
+          formTip: '初期目安20kg。腕で引っ張らず、息を吐きながらおへそを覗き込むように背中を丸めます。'
+        },
+        {
+          id: 'd2_cardio',
+          name: '有酸素マシン（バイク／トレッドミル）',
+          muscle: '脂肪燃焼',
+          tag: '減量・代謝',
+          isCardio: true,
+          initialWeight: 20,
+          stepKg: 5,
+          targetReps: 1,
+          repRange: '20–25分連続',
+          targetSets: 1,
+          restSec: 60,
+          videoId: '',
+          videoLabel: '',
+          formTip: '会話ができる程度の強度（心拍120〜135）で20〜25分キープしましょう。'
+        }
+      ]
+    },
+    {
+      id: 'day3',
+      badge: 'Day 3',
+      title: '背中・体幹回旋＆スイング軸',
+      duration: '目安 100〜110分',
+      desc: 'ゴルフの再現性に直結する「背中（引く力）＋ロータリートーソ＋ケーブル回旋」を集中的に鍛えます。',
+      exercises: [
+        {
+          id: 'd3_latpull',
+          name: 'ラットプルダウン',
+          muscle: '広背筋（背中全体）',
+          tag: 'ゴルフ安定',
+          initialWeight: 30,
+          stepKg: 5,
+          targetReps: 12,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 90,
+          videoId: 'hSmvuwPJEWE',
+          videoLabel: '初心者向けラットプルダウン解説',
+          formTip: '初期目安30kg。肩幅より少し広めに握り、胸を張って鎖骨あたりへ肘を真下に引き下ろします。'
+        },
+        {
+          id: 'd3_seatedrow',
+          name: 'シーテッドロー',
+          muscle: '広背筋・僧帽筋（背中中央）',
+          tag: 'ゴルフ安定',
+          initialWeight: 25,
+          stepKg: 5,
+          targetReps: 12,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 90,
+          videoId: '5enflVXtG8k',
+          videoLabel: 'FIT-EASY公式 シーテッドロー',
+          formTip: '初期目安25kg。胸パッドに体を預け、反動を使わずに肩甲骨を背骨へ寄せるように引き切ります。'
+        },
+        {
+          id: 'd3_chinning',
+          name: 'アシストディップチン（チンニング）',
+          muscle: '背中上部・握力',
+          tag: 'アシスト式',
+          isAssist: true,
+          initialWeight: 55,
+          stepKg: 5,
+          targetReps: 10,
+          repRange: '8–10回',
+          targetSets: 3,
+          restSec: 90,
+          videoId: 'arNjurWbtME',
+          videoLabel: 'FIT-EASY公式 アシストチンニング',
+          formTip: '初期目安アシスト55kg（数値が大きいほど軽くなります）。降りる時は片足ずつゆっくり降りて安全確保。'
+        },
+        {
+          id: 'd3_rotary',
+          name: 'ロータリートーソ',
+          muscle: '腹斜筋（ゴルフ捻転）',
+          tag: '体幹回旋',
+          initialWeight: 15,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '左右12–15回',
+          targetSets: 3,
+          restSec: 45,
+          videoId: 'M1UiOaKCSmg',
+          videoLabel: 'ロータリートーソ基本編',
+          formTip: '初期目安15kg。腕の力や反動を使わず、下腹部と脇腹でゆっくり捻ります。ゴルフの捻転差作りに最適です。'
+        },
+        {
+          id: 'd3_cable',
+          name: 'ケーブルマシン（ウッドチョップ／パロフ）',
+          muscle: '体幹回旋・抗回旋',
+          tag: '体幹回旋',
+          initialWeight: 10,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '左右12回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'TIOIQYCmu5k',
+          videoLabel: 'ケーブルマシン ゴルフ強化解説',
+          formTip: '初期目安10kg。下半身をどっしり安定させ、斜め上→斜め下（または胸前で静止）へ体幹連動でコントロールします。'
+        },
+        {
+          id: 'd3_legraise',
+          name: 'レッグレイズ',
+          muscle: '下腹部・腸腰筋',
+          tag: '体幹回旋',
+          isBodyweight: true,
+          initialWeight: 0,
+          stepKg: 0,
+          targetReps: 10,
+          repRange: '10–12回',
+          targetSets: 3,
+          restSec: 45,
+          videoId: 'si1ZQzEqab4',
+          videoLabel: '初心者向けレッグレイズ解説',
+          formTip: '初期目安：自重（0kg）。脚を伸ばすのがきつい間は、膝を90度に曲げて引き上げるニーレイズから始めましょう。'
+        },
+        {
+          id: 'd3_golf',
+          name: 'FIT-GOLF または 有酸素マシン',
+          muscle: 'スイング軸定着・燃焼',
+          tag: 'ゴルフ安定',
+          isCardio: true,
+          initialWeight: 20,
+          stepKg: 5,
+          targetReps: 1,
+          repRange: '20分',
+          targetSets: 1,
+          restSec: 60,
+          videoId: '',
+          videoLabel: '',
+          formTip: '体幹が入った直後にハーフスイングで軸ブレを確認すると、筋トレの成果がショット安定に直結します。'
+        }
+      ]
+    },
+    {
+      id: 'day4',
+      badge: 'Day 4',
+      title: 'ゴルフ特化＆脂肪燃焼ブースト',
+      duration: '目安 95〜115分',
+      desc: '週4回通える週のボーナス枠。中負荷サーキットで左右差を整え、FIT-GOLFと有酸素で仕上げます。',
+      exercises: [
+        {
+          id: 'd4_legpress',
+          name: 'レッグプレス（中負荷テンポ）',
+          muscle: '下半身全体・血流促進',
+          tag: '減量・代謝',
+          initialWeight: 40,
+          stepKg: 5,
+          targetReps: 15,
+          repRange: '12–15回',
+          targetSets: 3,
+          restSec: 75,
+          videoId: '7_qPg97ys4g',
+          videoLabel: '初心者向けレッグプレス解説',
+          formTip: '初期目安40kg（Day 1よりやや軽め）。フォームを丁寧に保ち、テンポ良く15回回して代謝を上げます。'
+        },
+        {
+          id: 'd4_abdadd',
+          name: 'アブダクション／アダクション',
+          muscle: '股関節バランス',
+          tag: 'ゴルフ安定',
+          initialWeight: 20,
+          stepKg: 5,
+          targetReps: 15,
+          repRange: '各15回',
+          targetSets: 2,
+          restSec: 45,
+          videoId: 'KpcDmC9cflA',
+          videoLabel: 'アブダクション／アダクション解説',
+          formTip: '初期目安20kg。スイング前に中臀筋と内転筋へスイッチを入れ、下半身の安定感を高めます。'
+        },
+        {
+          id: 'd4_core360',
+          name: 'ロータリートーソ＆ローワーバック',
+          muscle: '腹斜筋・脊柱起立筋',
+          tag: '体幹回旋',
+          initialWeight: 15,
+          stepKg: 2.5,
+          targetReps: 12,
+          repRange: '各12–15回',
+          targetSets: 3,
+          restSec: 45,
+          videoId: 'M1UiOaKCSmg',
+          videoLabel: 'ロータリートーソ基本編',
+          formTip: '初期目安15kg。脇腹と背筋をバランスよく刺激し、360度ブレない体幹の軸を仕上げます。'
+        },
+        {
+          id: 'd4_cableface',
+          name: 'ケーブルマシン（フェイスプル）',
+          muscle: '肩甲骨・肩後面',
+          tag: 'ゴルフ安定',
+          initialWeight: 10,
+          stepKg: 2.5,
+          targetReps: 15,
+          repRange: '15回',
+          targetSets: 3,
+          restSec: 60,
+          videoId: 'TIOIQYCmu5k',
+          videoLabel: 'ケーブルマシン解説',
+          formTip: '初期目安10kg。ロープを顔の高さへ引き、肩甲骨を寄せることでトップ位置での力みと猫背を防ぎます。'
+        },
+        {
+          id: 'd4_golfcardio',
+          name: 'FIT-GOLF（25分）＋ 有酸素（25分）',
+          muscle: '実戦スイング＆脂肪燃焼',
+          tag: 'ゴルフ安定',
+          isCardio: true,
+          initialWeight: 50,
+          stepKg: 5,
+          targetReps: 1,
+          repRange: '合計50分',
+          targetSets: 1,
+          restSec: 60,
+          videoId: '',
+          videoLabel: '',
+          formTip: '週1回はこのタイミングで店内の体組成計に乗り、体重・体脂肪率を「体重・履歴」タブへ記録しましょう。'
+        }
+      ]
+    }
+  ];
+
+  // App State
+  let state = loadState();
+  let activeTab = 'workout';
+  let activeDayId = 'day1';
+  let weightChartInstance = null;
+
+  // Timer State
+  let timerTotalSec = 90;
+  let timerRemainSec = 90;
+  let timerRunning = false;
+  let timerIntervalId = null;
+  let timerMuted = false;
+  let audioCtx = null;
+
+  function defaultState() {
+    const customTargets = {};
+    PROGRAM_DAYS.forEach(day => {
+      day.exercises.forEach(ex => {
+        customTargets[ex.id] = {
+          weight: ex.initialWeight,
+          reps: ex.targetReps,
+          sets: ex.targetSets,
+          restSec: ex.restSec
+        };
+      });
+    });
+    return {
+      customTargets,
+      logs: [], // { id, date, dayId, exerciseId, name, weight, reps, sets, effort, isAssist, isCardio, isBodyweight }
+      weights: [
+        { date: todayStr(), weight: 92.0, bodyFat: null, memo: 'スタート基準（目標78.0kg）' }
+      ]
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      const base = defaultState();
+      return {
+        customTargets: Object.assign({}, base.customTargets, parsed.customTargets || {}),
+        logs: Array.isArray(parsed.logs) ? parsed.logs : [],
+        weights: Array.isArray(parsed.weights) && parsed.weights.length ? parsed.weights : base.weights
+      };
+    } catch (e) {
+      return defaultState();
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      // Ignore storage errors in restricted environments
+    }
+  }
+
+  function todayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function getExerciseById(exId) {
+    for (const day of PROGRAM_DAYS) {
+      const found = day.exercises.find(e => e.id === exId);
+      if (found) return { day, ex: found };
+    }
+    return null;
+  }
+
+  function getLatestLogForExercise(exId) {
+    for (let i = state.logs.length - 1; i >= 0; i--) {
+      if (state.logs[i].exerciseId === exId) return state.logs[i];
+    }
+    return null;
+  }
+
+  function isLoggedToday(exId) {
+    const t = todayStr();
+    return state.logs.some(l => l.exerciseId === exId && l.date === t);
+  }
+
+  // Agent Next-Week Proposal Logic
+  function computeProposal(ex) {
+    const target = state.customTargets[ex.id] || {
+      weight: ex.initialWeight,
+      reps: ex.targetReps,
+      sets: ex.targetSets,
+      restSec: ex.restSec
+    };
+    const latest = getLatestLogForExercise(ex.id);
+    if (!latest) {
+      return {
+        hasLog: false,
+        statusLabel: '初回目安',
+        badgeClass: 'bg-slate-100 text-slate-700',
+        nextWeight: target.weight,
+        nextReps: target.reps,
+        nextSets: target.sets,
+        nextRestSec: target.restSec,
+        reason: 'まだ記録がありません。まずはフォーム習得用の初期目安で試し、体感（楽／ちょうどよい／きつい）を記録してください。'
+      };
+    }
+
+    const w = Number(latest.weight);
+    const r = Number(latest.reps);
+    const s = Number(latest.sets);
+    const effort = latest.effort;
+    let nextWeight = w;
+    let nextReps = r;
+    let nextSets = s;
+    let nextRestSec = target.restSec;
+    let statusLabel = '維持';
+    let badgeClass = 'bg-sky-100 text-sky-800';
+    let reason = '';
+
+    if (ex.isCardio) {
+      if (effort === 'easy') {
+        nextWeight = Math.min(45, w + 5);
+        statusLabel = '時間＋5分';
+        badgeClass = 'bg-emerald-100 text-emerald-800';
+        reason = '余裕を持って完走できたため、次週は＋5分（または傾斜＋1%）で脂肪燃焼効率を一段引き上げましょう。';
+      } else if (effort === 'hard') {
+        nextWeight = Math.max(15, w - 5);
+        statusLabel = '負荷調整';
+        badgeClass = 'bg-amber-100 text-amber-800';
+        reason = '疲労が強かったため、次週は5分短くして心拍120〜130の無理ないペースを維持します。';
+      } else {
+        statusLabel = '適正キープ';
+        reason = 'ちょうどよい燃焼ペースです。次週も同じ時間・心拍ゾーンで継続しましょう。';
+      }
+    } else if (ex.isBodyweight) {
+      if (effort === 'easy') {
+        nextReps = Math.min(20, r + 2);
+        statusLabel = '回数＋2回';
+        badgeClass = 'bg-emerald-100 text-emerald-800';
+        reason = '余裕が出てきたため、次週は＋2回（または膝を少し伸ばして強度アップ）に挑戦しましょう。';
+      } else if (effort === 'hard') {
+        nextReps = Math.max(6, r - 2);
+        statusLabel = '回数調整';
+        badgeClass = 'bg-amber-100 text-amber-800';
+        reason = '腰が反らない範囲でコントロールできるよう、次週は回数を2回落として丁寧に行います。';
+      } else {
+        statusLabel = '適正キープ';
+        reason = '良い刺激が入っています。下ろす動作を2秒かけてゆっくり行う意識で継続しましょう。';
+      }
+    } else if (ex.isAssist) {
+      // Assist machine: HIGHER weight = EASIER, LOWER weight = HARDER
+      const step = ex.stepKg || 5;
+      if (effort === 'easy') {
+        nextWeight = Math.max(5, w - step);
+        statusLabel = `アシスト −${step}kg`;
+        badgeClass = 'bg-emerald-100 text-emerald-800';
+        reason = `余裕があったため、次週は補助重量を${step}kg減らして（${w}kg → ${nextWeight}kg）自重の割合を少し増やします。`;
+      } else if (effort === 'hard') {
+        nextWeight = w + step;
+        nextRestSec = Math.min(120, target.restSec + 15);
+        statusLabel = `アシスト ＋${step}kg`;
+        badgeClass = 'bg-amber-100 text-amber-800';
+        reason = `負荷が強すぎたため、次週は補助重量を${step}kg増やして（${w}kg → ${nextWeight}kg）正しい可動域を守ります。`;
+      } else {
+        statusLabel = '適正キープ';
+        reason = `アシスト${w}kgが現在の最適負荷です。フォームの安定を優先して同設定で積み上げましょう。`;
+      }
+    } else {
+      // Standard resistance machine / free weight
+      const step = ex.stepKg || 2.5;
+      if (effort === 'easy') {
+        nextWeight = Number((w + step).toFixed(1));
+        statusLabel = `＋${step}kg 増量`;
+        badgeClass = 'bg-emerald-100 text-emerald-800';
+        reason = `「楽だった」の評価を受け、次週は${w}kg → ${nextWeight}kgへ漸進的にステップアップしましょう。`;
+      } else if (effort === 'hard') {
+        nextWeight = Math.max(5, Number((w - step).toFixed(1)));
+        nextRestSec = Math.min(150, target.restSec + 15);
+        statusLabel = `−${step}kg 調整`;
+        badgeClass = 'bg-amber-100 text-amber-800';
+        reason = `「きつかった」ため怪我とフォーム崩れを防止。次週は${nextWeight}kgへ少し下げ、休憩も${nextRestSec}秒に延ばします。`;
+      } else {
+        statusLabel = '適正キープ';
+        reason = `${w}kgがフォーム習得と筋刺激のスイートスポットです。次週は同重量で戻す動作を2秒意識しましょう。`;
+      }
+    }
+
+    return {
+      hasLog: true,
+      latest,
+      statusLabel,
+      badgeClass,
+      nextWeight,
+      nextReps,
+      nextSets,
+      nextRestSec,
+      reason
+    };
+  }
+
+  // Toast helper
+  let toastTimeout = null;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      el.classList.add('hidden');
+    }, 2600);
+  }
+
+  // Web Audio Beep for Timer
+  function playBeep() {
+    if (timerMuted) return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      [0, 0.22, 0.44].forEach(offset => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now + offset);
+        gain.gain.setValueAtTime(0.18, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.16);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.17);
+      });
+    } catch (e) {
+      // Ignore audio errors
+    }
+  }
+
+  // Timer Functions
+  function formatTime(sec) {
+    const s = Math.max(0, Math.floor(sec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+  }
+
+  function updateTimerUI() {
+    document.getElementById('timerDisplay').textContent = formatTime(timerRemainSec);
+    document.getElementById('timerStartPauseBtn').textContent = timerRunning ? '一時停止' : '開始';
+    document.getElementById('timerStatus').textContent = timerRunning
+      ? 'カウント中'
+      : (timerRemainSec === 0 ? '休憩終了！次のセットへ' : '待機中');
+    const pct = timerTotalSec > 0 ? Math.max(0, Math.min(100, (timerRemainSec / timerTotalSec) * 100)) : 0;
+    document.getElementById('timerProgress').style.width = `${pct}%`;
+    document.getElementById('timerMuteBtn').textContent = timerMuted ? '音OFF' : '音ON';
+  }
+
+  function stopTimerInterval() {
+    if (timerIntervalId !== null) {
+      clearInterval(timerIntervalId);
+      timerIntervalId = null;
+    }
+    timerRunning = false;
+  }
+
+  function startTimerWithSeconds(sec, label) {
+    stopTimerInterval();
+    timerTotalSec = Math.max(15, sec);
+    timerRemainSec = timerTotalSec;
+    if (label) {
+      document.getElementById('timerLabel').textContent = label;
+    }
+    timerRunning = true;
+    updateTimerUI();
+    timerIntervalId = setInterval(() => {
+      if (timerRemainSec > 1) {
+        timerRemainSec -= 1;
+        updateTimerUI();
+      } else {
+        timerRemainSec = 0;
+        stopTimerInterval();
+        updateTimerUI();
+        playBeep();
+        showToast('インターバル終了！次のセットを始めましょう');
+      }
+    }, 1000);
+  }
+
+  function toggleTimer() {
+    if (timerRunning) {
+      stopTimerInterval();
+      updateTimerUI();
+    } else {
+      if (timerRemainSec <= 0) timerRemainSec = timerTotalSec;
+      timerRunning = true;
+      updateTimerUI();
+      timerIntervalId = setInterval(() => {
+        if (timerRemainSec > 1) {
+          timerRemainSec -= 1;
+          updateTimerUI();
+        } else {
+          timerRemainSec = 0;
+          stopTimerInterval();
+          updateTimerUI();
+          playBeep();
+          showToast('インターバル終了！次のセットを始めましょう');
+        }
+      }, 1000);
+    }
+  }
+
+  // Video Modal Functions (with Error 153 / Referrer-Policy fix)
+  let currentVideoEx = null;
+  let currentEmbedDomain = 'youtube-nocookie'; // 'youtube-nocookie' | 'youtube' | 'thumbnail'
+
+  function isLocalOrNullOrigin() {
+    try {
+      const proto = window.location.protocol;
+      const origin = window.location.origin;
+      return proto === 'file:' || proto === 'content:' || !origin || origin === 'null';
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function renderVideoPlayer() {
+    if (!currentVideoEx) return;
+    const ex = currentVideoEx;
+    const container = document.getElementById('videoFrameContainer');
+    const notice = document.getElementById('videoEnvNotice');
+    const toggleBtn = document.getElementById('toggleEmbedModeBtn');
+    const watchUrl = `https://www.youtube.com/watch?v=${ex.videoId}`;
+    const thumbUrl = `https://i.ytimg.com/vi/${ex.videoId}/hqdefault.jpg`;
+
+    if (currentEmbedDomain === 'thumbnail') {
+      container.innerHTML = `
+        <a href="${watchUrl}" target="_blank" rel="noopener noreferrer" class="relative block w-full h-full group overflow-hidden bg-slate-900">
+          <img src="${thumbUrl}" alt="${ex.name}" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition">
+          <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/35 group-hover:bg-black/20 transition">
+            <div class="w-16 h-11 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg">
+              <span class="text-white text-xl leading-none ml-1">▶</span>
+            </div>
+            <span class="mt-2 px-3 py-1 rounded-full bg-black/75 text-white text-xs font-bold">タップしてYouTubeで再生</span>
+          </div>
+        </a>`;
+      notice.textContent = 'ローカルファイル（file://）やプレビュー画面から直接開いているため、YouTubeの仕様（HTTP Referer必須・エラー153対策）によりサムネイル起動モードで表示しています。HTTPS環境（Netlify DropやGitHub Pages等）に配置するとアプリ内埋め込み再生が動作します。';
+      notice.classList.remove('hidden');
+      toggleBtn.textContent = '埋め込み再生を試す';
+      return;
+    }
+
+    const host = currentEmbedDomain === 'youtube-nocookie'
+      ? 'https://www.youtube-nocookie.com'
+      : 'https://www.youtube.com';
+    const originParam = (!isLocalOrNullOrigin() && window.location.origin)
+      ? `&origin=${encodeURIComponent(window.location.origin)}`
+      : '';
+    const embedUrl = `${host}/embed/${ex.videoId}?rel=0&playsinline=1&enablejsapi=1${originParam}`;
+
+    container.innerHTML = `<iframe class="w-full h-full" src="${embedUrl}" title="${ex.name}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+
+    if (isLocalOrNullOrigin()) {
+      notice.textContent = '現在ローカルファイル（file://）または制限環境で開いているため、YouTube側で「エラー153」が出る場合があります。その場合は右の「YouTubeアプリで開く」をご利用ください。';
+      notice.classList.remove('hidden');
+    } else {
+      notice.classList.add('hidden');
+    }
+    toggleBtn.textContent = currentEmbedDomain === 'youtube-nocookie'
+      ? '標準埋め込みへ切替'
+      : 'サムネイル起動へ切替';
+  }
+
+  function openVideoModal(ex) {
+    currentVideoEx = ex;
+    currentEmbedDomain = isLocalOrNullOrigin() ? 'thumbnail' : 'youtube-nocookie';
+    document.getElementById('videoModalTitle').textContent = ex.name;
+    document.getElementById('videoModalSubtitle').textContent = `${ex.muscle}｜${ex.videoLabel || '初心者フォーム解説'}`;
+    document.getElementById('videoModalTips').textContent = ex.formTip;
+    document.getElementById('videoExternalLink').href = `https://www.youtube.com/watch?v=${ex.videoId}`;
+    renderVideoPlayer();
+    document.getElementById('videoModal').classList.remove('hidden');
+  }
+
+  function closeVideoModal() {
+    currentVideoEx = null;
+    document.getElementById('videoFrameContainer').innerHTML = '';
+    document.getElementById('videoModal').classList.add('hidden');
+  }
+
+  // Render Header & Weight Summary
+  function renderHeaderSummary() {
+    const latestW = state.weights.length ? Number(state.weights[state.weights.length - 1].weight) : 92.0;
+    const remain = Math.max(0, latestW - 78.0);
+    document.getElementById('headerWeightSummary').textContent = `${latestW.toFixed(1)}kg / 残${remain.toFixed(1)}kg`;
+    const pct = Math.max(0, Math.min(100, ((92.0 - latestW) / 14.0) * 100));
+    document.getElementById('weightGoalPct').textContent = `${Math.round(pct)}% 達成`;
+    document.getElementById('weightGoalBar').style.width = `${pct}%`;
+    document.getElementById('latestWeightDisplay').textContent = `${latestW.toFixed(1)} kg`;
+    document.getElementById('weightInput').value = latestW.toFixed(1);
+  }
+
+  // Render Day Tabs & Exercise Cards
+  function renderWorkoutView() {
+    const tabsEl = document.getElementById('dayTabs');
+    tabsEl.innerHTML = PROGRAM_DAYS.map(d => {
+      const isActive = d.id === activeDayId;
+      return `<button type="button" data-day="${d.id}" class="day-tab-btn shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+        isActive
+          ? 'bg-[#0F291E] text-white shadow'
+          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+      }">${d.badge}：${d.title.split('・')[0]}</button>`;
+    }).join('');
+
+    const day = PROGRAM_DAYS.find(d => d.id === activeDayId) || PROGRAM_DAYS[0];
+    document.getElementById('dayBadge').textContent = day.badge;
+    document.getElementById('dayDuration').textContent = day.duration;
+    document.getElementById('dayTitle').textContent = day.title;
+    document.getElementById('dayDesc').textContent = day.desc;
+
+    const doneCount = day.exercises.filter(ex => isLoggedToday(ex.id)).length;
+    const totalCount = day.exercises.length;
+    document.getElementById('dayProgressText').textContent = `${doneCount} / ${totalCount}`;
+    document.getElementById('dayProgressBar').style.width = `${totalCount ? (doneCount / totalCount) * 100 : 0}%`;
+
+    const listEl = document.getElementById('exerciseList');
+    listEl.innerHTML = day.exercises.map(ex => {
+      const target = state.customTargets[ex.id] || {
+        weight: ex.initialWeight,
+        reps: ex.targetReps,
+        sets: ex.targetSets,
+        restSec: ex.restSec
+      };
+      const latest = getLatestLogForExercise(ex.id);
+      const doneToday = isLoggedToday(ex.id);
+      const selectedEffort = latest ? latest.effort : 'justright';
+
+      const tagColor = ex.tag === 'ゴルフ安定'
+        ? 'bg-sky-100 text-sky-800'
+        : ex.tag === '体幹回旋'
+          ? 'bg-indigo-100 text-indigo-800'
+          : ex.tag === 'アシスト式'
+            ? 'bg-amber-100 text-amber-800'
+            : 'bg-emerald-100 text-emerald-800';
+
+      const weightLabel = ex.isCardio
+        ? '時間 (分)'
+        : ex.isAssist
+          ? 'アシスト (kg) ※大ほど楽'
+          : ex.isBodyweight
+            ? '追加負荷 (kg)'
+            : '重量 (kg)';
+
+      const initialGuide = ex.isCardio
+        ? `目安 ${target.weight}分`
+        : ex.isAssist
+          ? `目安 アシスト${target.weight}kg × ${target.reps}回 × ${target.sets}セット`
+          : ex.isBodyweight
+            ? `目安 自重(${target.weight}kg) × ${target.reps}回 × ${target.sets}セット`
+            : `目安 ${target.weight}kg × ${target.reps}回 × ${target.sets}セット`;
+
+      return `
+        <article class="bg-white rounded-2xl p-4 shadow-sm border ${doneToday ? 'border-emerald-400 ring-1 ring-emerald-200' : 'border-slate-200/80'}" data-ex-card="${ex.id}">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${tagColor}">${ex.tag}</span>
+                ${doneToday ? '<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-600 text-white">今日完了 ✓</span>' : ''}
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mt-1">${ex.name}</h3>
+              <p class="text-xs text-slate-500">${ex.muscle}｜<span class="font-semibold text-emerald-800">${initialGuide}</span></p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${ex.videoId ? `<button type="button" data-action="video" data-ex="${ex.id}" class="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold transition">▶ 動画</button>` : ''}
+              ${!ex.isCardio ? `<button type="button" data-action="timer" data-ex="${ex.id}" data-sec="${target.restSec}" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold tabular-nums transition">⏱ ${target.restSec}秒</button>` : ''}
+            </div>
+          </div>
+
+          <p class="mt-2.5 text-xs text-slate-600 bg-slate-50 rounded-xl px-3 py-2 leading-relaxed">${ex.formTip}</p>
+
+          <div class="grid grid-cols-3 gap-2 mt-3">
+            <div>
+              <label class="block text-[11px] font-medium text-slate-500 mb-1 truncate">${weightLabel}</label>
+              <input type="number" step="0.5" min="0" max="300" data-field="weight" value="${target.weight}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-500 mb-1">${ex.isCardio ? 'セッション' : '回数'}</label>
+              <input type="number" step="1" min="1" max="100" data-field="reps" value="${target.reps}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-500 mb-1">セット数</label>
+              <input type="number" step="1" min="1" max="10" data-field="sets" value="${target.sets}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="text-[11px] font-medium text-slate-500 mb-1.5">セット後の体感（次週のAI提案に使用）</div>
+            <div class="grid grid-cols-3 gap-1.5" data-effort-group="${ex.id}">
+              <button type="button" data-action="effort" data-effort="easy" class="effort-btn py-2 rounded-xl text-xs font-bold border transition ${selectedEffort === 'easy' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">😊 楽だった</button>
+              <button type="button" data-action="effort" data-effort="justright" class="effort-btn py-2 rounded-xl text-xs font-bold border transition ${selectedEffort === 'justright' ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">💪 ちょうどよい</button>
+              <button type="button" data-action="effort" data-effort="hard" class="effort-btn py-2 rounded-xl text-xs font-bold border transition ${selectedEffort === 'hard' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">🔥 きつかった</button>
+            </div>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between gap-2">
+            <span class="text-[11px] text-slate-500 truncate">${latest ? `前回(${latest.date})：${latest.weight}${ex.isCardio ? '分' : 'kg'} × ${latest.reps}` : '未記録（初期フォーム習得目安を表示中）'}</span>
+            <button type="button" data-action="save-log" data-ex="${ex.id}" class="shrink-0 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 active:scale-[0.98] text-white text-xs font-bold transition">
+              記録を保存
+            </button>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  // Render AI Agent View
+  function renderAgentView() {
+    let loggedCount = 0;
+    let stepUpCount = 0;
+    let adjustDownCount = 0;
+    const itemsHtml = [];
+
+    PROGRAM_DAYS.forEach(day => {
+      day.exercises.forEach(ex => {
+        const p = computeProposal(ex);
+        if (p.hasLog) {
+          loggedCount++;
+          if (p.latest.effort === 'easy') stepUpCount++;
+          if (p.latest.effort === 'hard') adjustDownCount++;
+        }
+        const unit = ex.isCardio ? '分' : 'kg';
+        const prefix = ex.isAssist ? 'アシスト ' : '';
+        itemsHtml.push(`
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="text-[11px] font-bold text-slate-400">${day.badge}</span>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900">${ex.name}</h3>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold ${p.badgeClass}">${p.statusLabel}</span>
+            </div>
+            <div class="mt-2.5 grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-50 rounded-xl p-2.5">
+                <div class="text-slate-500">前回の記録</div>
+                <div class="font-bold text-slate-800 mt-0.5 tabular-nums">
+                  ${p.hasLog ? `${prefix}${p.latest.weight}${unit} × ${p.latest.reps} × ${p.latest.sets}s` : 'まだ記録なし'}
+                </div>
+              </div>
+              <div class="bg-emerald-50 rounded-xl p-2.5">
+                <div class="text-emerald-700">次週の提案目安</div>
+                <div class="font-bold text-emerald-900 mt-0.5 tabular-nums">
+                  ${prefix}${p.nextWeight}${unit} × ${p.nextReps} × ${p.nextSets}s（休憩${p.nextRestSec}秒）
+                </div>
+              </div>
+            </div>
+            <p class="mt-2.5 text-xs text-slate-600 leading-relaxed">${p.reason}</p>
+          </div>
+        `);
+      });
+    });
+
+    document.getElementById('agentSummaryStats').innerHTML = `
+      <div>
+        <div class="text-xs text-emerald-200/80">記録済み種目</div>
+        <div class="text-lg font-bold tabular-nums">${loggedCount}</div>
+      </div>
+      <div>
+        <div class="text-xs text-emerald-200/80">ステップアップ</div>
+        <div class="text-lg font-bold text-emerald-300 tabular-nums">${stepUpCount}</div>
+      </div>
+      <div>
+        <div class="text-xs text-emerald-200/80">安全負荷調整</div>
+        <div class="text-lg font-bold text-amber-300 tabular-nums">${adjustDownCount}</div>
+      </div>
+    `;
+    document.getElementById('agentProposalList').innerHTML = itemsHtml.join('');
+  }
+
+  // Render Progress & Weight Chart
+  function renderProgressView() {
+    renderHeaderSummary();
+
+    // History list
+    const histEl = document.getElementById('workoutHistoryList');
+    document.getElementById('historyCountBadge').textContent = `${state.logs.length}件`;
+    if (state.logs.length === 0) {
+      histEl.innerHTML = '<p class="text-xs text-slate-500 py-3">まだトレーニング記録がありません。「メニュー」タブから各種目を保存するとここに表示されます。</p>';
+    } else {
+      const recent = state.logs.slice().reverse().slice(0, 20);
+      histEl.innerHTML = recent.map(log => {
+        const effortBadge = log.effort === 'easy'
+          ? '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">楽</span>'
+          : log.effort === 'hard'
+            ? '<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">きつい</span>'
+            : '<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">適正</span>';
+        const unit = log.isCardio ? '分' : 'kg';
+        const prefix = log.isAssist ? 'アシスト' : '';
+        return `
+          <div class="flex items-center justify-between gap-2 py-2 border-b border-slate-100 text-xs">
+            <div class="min-w-0">
+              <div class="font-bold text-slate-800 truncate">${log.name}</div>
+              <div class="text-slate-500">${log.date}｜${prefix}${log.weight}${unit} × ${log.reps} × ${log.sets}セット</div>
+            </div>
+            <div class="shrink-0">${effortBadge}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Weight Chart
+    const canvas = document.getElementById('weightChart');
+    if (typeof Chart === 'undefined' || !canvas) return;
+    if (weightChartInstance) {
+      weightChartInstance.destroy();
+    }
+    const labels = state.weights.map(w => w.date.slice(5));
+    const values = state.weights.map(w => Number(w.weight));
+    const goalLine = state.weights.map(() => 78.0);
+
+    weightChartInstance = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: '体重 (kg)',
+            data: values,
+            borderColor: '#059669',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.25,
+            pointRadius: 4,
+            pointBackgroundColor: '#059669'
+          },
+          {
+            label: '最終目標 (78.0kg)',
+            data: goalLine,
+            borderColor: '#64748B',
+            borderDash: [6, 6],
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+        },
+        scales: {
+          y: {
+            suggestedMin: 76,
+            suggestedMax: 94,
+            ticks: { callback: v => `${v}kg`, font: { size: 11 } }
+          },
+          x: { ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  // Render Gym Settings View
+  function renderSettingsView() {
+    document.getElementById('gymMachineChips').innerHTML = HADANO_MACHINES.map(m =>
+      `<span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">${m}</span>`
+    ).join('');
+  }
+
+  // Tab Switching
+  function switchTab(tabName) {
+    activeTab = tabName;
+    ['workout', 'agent', 'progress', 'settings'].forEach(t => {
+      const sec = document.getElementById(`view-${t}`);
+      if (t === tabName) sec.classList.remove('hidden');
+      else sec.classList.add('hidden');
+    });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const isMatch = btn.dataset.tab === tabName;
+      btn.classList.toggle('text-emerald-700', isMatch);
+      btn.classList.toggle('font-bold', isMatch);
+      btn.classList.toggle('text-slate-500', !isMatch);
+      btn.classList.toggle('font-medium', !isMatch);
+    });
+    if (tabName === 'workout') renderWorkoutView();
+    if (tabName === 'agent') renderAgentView();
+    if (tabName === 'progress') renderProgressView();
+    if (tabName === 'settings') renderSettingsView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Event Listeners
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  document.getElementById('dayTabs').addEventListener('click', e => {
+    const btn = e.target.closest('.day-tab-btn');
+    if (!btn) return;
+    activeDayId = btn.dataset.day;
+    renderWorkoutView();
+  });
+
+  document.getElementById('exerciseList').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+
+    if (action === 'video') {
+      const found = getExerciseById(btn.dataset.ex);
+      if (found && found.ex.videoId) openVideoModal(found.ex);
+      return;
+    }
+
+    if (action === 'timer') {
+      const found = getExerciseById(btn.dataset.ex);
+      const sec = Number(btn.dataset.sec) || 90;
+      startTimerWithSeconds(sec, `${found ? found.ex.name : 'セット間'} 休憩タイマー`);
+      showToast(`${sec}秒タイマーを開始しました`);
+      return;
+    }
+
+    if (action === 'effort') {
+      const group = btn.closest('[data-effort-group]');
+      if (!group) return;
+      const chosen = btn.dataset.effort;
+      group.dataset.selected = chosen;
+      group.querySelectorAll('.effort-btn').forEach(b => {
+        const val = b.dataset.effort;
+        b.className = 'effort-btn py-2 rounded-xl text-xs font-bold border transition ' + (
+          val === chosen
+            ? (val === 'easy' ? 'bg-emerald-600 text-white border-emerald-600'
+              : val === 'hard' ? 'bg-amber-600 text-white border-amber-600'
+              : 'bg-sky-600 text-white border-sky-600')
+            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+        );
+      });
+      return;
+    }
+
+    if (action === 'save-log') {
+      const exId = btn.dataset.ex;
+      const card = btn.closest('[data-ex-card]');
+      const found = getExerciseById(exId);
+      if (!card || !found) return;
+
+      const weight = parseFloat(card.querySelector('[data-field="weight"]').value);
+      const reps = parseInt(card.querySelector('[data-field="reps"]').value, 10);
+      const sets = parseInt(card.querySelector('[data-field="sets"]').value, 10);
+      const group = card.querySelector('[data-effort-group]');
+      let effort = group ? group.dataset.selected : '';
+      if (!effort) {
+        const activeBtn = group ? group.querySelector('.text-white') : null;
+        effort = activeBtn ? activeBtn.dataset.effort : 'justright';
+      }
+
+      if (Number.isNaN(weight) || Number.isNaN(reps) || Number.isNaN(sets)) {
+        showToast('数値を正しく入力してください');
+        return;
+      }
+
+      state.logs.push({
+        id: `${Date.now()}_${exId}`,
+        date: todayStr(),
+        dayId: found.day.id,
+        exerciseId: exId,
+        name: found.ex.name,
+        weight,
+        reps,
+        sets,
+        effort,
+        isAssist: Boolean(found.ex.isAssist),
+        isCardio: Boolean(found.ex.isCardio),
+        isBodyweight: Boolean(found.ex.isBodyweight)
+      });
+
+      // Keep current inputs synced
+      state.customTargets[exId] = Object.assign({}, state.customTargets[exId], {
+        weight,
+        reps,
+        sets
+      });
+      saveState();
+      renderWorkoutView();
+      showToast(`${found.ex.name} を記録しました！`);
+
+      const autoTimer = document.getElementById('autoStartTimerToggle').checked;
+      if (autoTimer && !found.ex.isCardio) {
+        const rest = (state.customTargets[exId] && state.customTargets[exId].restSec) || found.ex.restSec;
+        startTimerWithSeconds(rest, `${found.ex.name} 休憩タイマー`);
+      }
+    }
+  });
+
+  // Apply All Agent Proposals
+  document.getElementById('applyAllProposalsBtn').addEventListener('click', () => {
+    let updated = 0;
+    PROGRAM_DAYS.forEach(day => {
+      day.exercises.forEach(ex => {
+        const p = computeProposal(ex);
+        if (p.hasLog) {
+          state.customTargets[ex.id] = {
+            weight: p.nextWeight,
+            reps: p.nextReps,
+            sets: p.nextSets,
+            restSec: p.nextRestSec
+          };
+          updated++;
+        }
+      });
+    });
+    if (updated === 0) {
+      showToast('先に「メニュー」タブで1種目以上を記録してください');
+      return;
+    }
+    saveState();
+    renderAgentView();
+    showToast(`${updated}種目の次週目安をメニューへ反映しました！`);
+  });
+
+  // Save Weight
+  document.getElementById('saveWeightBtn').addEventListener('click', () => {
+    const w = parseFloat(document.getElementById('weightInput').value);
+    const bfRaw = document.getElementById('bodyFatInput').value.trim();
+    const bf = bfRaw ? parseFloat(bfRaw) : null;
+    const memo = document.getElementById('golfMemoInput').value.trim();
+    if (Number.isNaN(w) || w < 40 || w > 180) {
+      showToast('体重を正しく入力してください');
+      return;
+    }
+    const t = todayStr();
+    const existingIdx = state.weights.findIndex(item => item.date === t);
+    const entry = { date: t, weight: Number(w.toFixed(1)), bodyFat: bf, memo };
+    if (existingIdx >= 0) state.weights[existingIdx] = entry;
+    else state.weights.push(entry);
+    document.getElementById('golfMemoInput').value = '';
+    saveState();
+    renderProgressView();
+    showToast(`体重 ${entry.weight.toFixed(1)}kg を保存しました`);
+  });
+
+  // Timer Controls
+  document.getElementById('timerStartPauseBtn').addEventListener('click', toggleTimer);
+  document.getElementById('timerResetBtn').addEventListener('click', () => {
+    stopTimerInterval();
+    timerRemainSec = timerTotalSec;
+    updateTimerUI();
+  });
+  document.getElementById('timerMinusBtn').addEventListener('click', () => {
+    timerRemainSec = Math.max(5, timerRemainSec - 15);
+    timerTotalSec = Math.max(timerTotalSec, timerRemainSec);
+    updateTimerUI();
+  });
+  document.getElementById('timerPlusBtn').addEventListener('click', () => {
+    timerRemainSec += 15;
+    timerTotalSec = Math.max(timerTotalSec, timerRemainSec);
+    updateTimerUI();
+  });
+  document.getElementById('timerMuteBtn').addEventListener('click', () => {
+    timerMuted = !timerMuted;
+    updateTimerUI();
+  });
+
+  // Video Modal Close
+  document.getElementById('closeVideoModalBtn').addEventListener('click', closeVideoModal);
+  document.getElementById('toggleEmbedModeBtn').addEventListener('click', () => {
+    if (currentEmbedDomain === 'thumbnail') currentEmbedDomain = 'youtube-nocookie';
+    else if (currentEmbedDomain === 'youtube-nocookie') currentEmbedDomain = 'youtube';
+    else currentEmbedDomain = 'thumbnail';
+    renderVideoPlayer();
+  });
+  document.getElementById('videoModal').addEventListener('click', e => {
+    if (e.target.id === 'videoModal') closeVideoModal();
+  });
+
+  // Export / Import / Reset
+  document.getElementById('exportJsonBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fiteasy-hadano-backup-${todayStr()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('バックアップJSONを書き出しました');
+  });
+
+  document.getElementById('importJsonInput').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        if (!parsed || !parsed.customTargets) throw new Error('invalid');
+        state = {
+          customTargets: parsed.customTargets,
+          logs: Array.isArray(parsed.logs) ? parsed.logs : [],
+          weights: Array.isArray(parsed.weights) && parsed.weights.length ? parsed.weights : defaultState().weights
+        };
+        saveState();
+        renderHeaderSummary();
+        renderWorkoutView();
+        showToast('バックアップから復元しました');
+      } catch (err) {
+        showToast('JSONファイルの読み込みに失敗しました');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  document.getElementById('openResetModalBtn').addEventListener('click', () => {
+    document.getElementById('resetModal').classList.remove('hidden');
+  });
+  document.getElementById('cancelResetBtn').addEventListener('click', () => {
+    document.getElementById('resetModal').classList.add('hidden');
+  });
+  document.getElementById('confirmResetBtn').addEventListener('click', () => {
+    state = defaultState();
+    saveState();
+    document.getElementById('resetModal').classList.add('hidden');
+    renderHeaderSummary();
+    renderWorkoutView();
+    showToast('初期状態にリセットしました');
+  });
+
+  // Initial Render
+  renderHeaderSummary();
+  renderWorkoutView();
+  renderSettingsView();
+  updateTimerUI();
+})();
+</script>
+</body>
+</html>
